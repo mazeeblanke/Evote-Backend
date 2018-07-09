@@ -13,20 +13,15 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
-Route::post('/signup', function(Request $request) {
-    return response()->json([
-        'id' => 23
-    ]);
-});
+Route::post('/signup', 'SignupController@create');
+Route::post('/login', 'LoginController@create');
 
 Route::get('/w', function () {
     return response()->json([
         'w233e' => 2332
     ]);
-    // dd(app());
-    // return view('welcome');
 });
