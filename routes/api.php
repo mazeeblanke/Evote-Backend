@@ -20,8 +20,6 @@ use Illuminate\Http\Request;
 Route::post('/signup', 'SignupController@create');
 Route::post('/login', 'LoginController@create');
 
-Route::get('/w', function () {
-    return response()->json([
-        'w233e' => 2332
-    ]);
-});
+Route::resources([
+    'users' => 'UserController'
+]);
