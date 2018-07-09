@@ -46,6 +46,8 @@ class SignupController extends Controller
             'password' => bcrypt($request->input('password'))
         ]);
 
+        $user->assignRole('regular');
+
         if (! $token = auth()->attempt(request(['email', 'password']))) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }

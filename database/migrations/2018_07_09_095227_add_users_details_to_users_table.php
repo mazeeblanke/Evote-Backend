@@ -16,7 +16,7 @@ class AddUsersDetailsToUsersTable extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('firstname');
             $table->string('lastname');
-            $table->json('security_question');
+            $table->json('security_question')->nullable();
             $table->string('address');
             $table->string('city');
             $table->string('state');
