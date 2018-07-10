@@ -1,5 +1,7 @@
 <?php
 
+$url = env('DB_URL', 'postgres://exyqawfqvfumtc:001444d7ef22f763d368b81a952492457d8071edcfa5fb7c31c1c76e3f8fba62@ec2-54-83-59-239.compute-1.amazonaws.com:5432/d2bcdf6p3144qq');
+
 return [
 
     /*
@@ -56,11 +58,11 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'host' => env('DB_HOST', '127.0.0.1'),
+            'host' => env('DB_HOST', 'ec2-54-83-59-239.compute-1.amazonaws.com'),
             'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'database' => env('DB_DATABASE', 'd2bcdf6p3144qq'),
+            'username' => env('DB_USERNAME', 'exyqawfqvfumtc'),
+            'password' => env('DB_PASSWORD', '001444d7ef22f763d368b81a952492457d8071edcfa5fb7c31c1c76e3f8fba62'),
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
