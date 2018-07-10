@@ -1,6 +1,6 @@
 <?php
 
-$url = env('DB_URL', 'postgres://exyqawfqvfumtc:001444d7ef22f763d368b81a952492457d8071edcfa5fb7c31c1c76e3f8fba62@ec2-54-83-59-239.compute-1.amazonaws.com:5432/d2bcdf6p3144qq');
+$url = env('DATABASE_URL', 'postgres://exyqawfqvfumtc:001444d7ef22f763d368b81a952492457d8071edcfa5fb7c31c1c76e3f8fba62@ec2-54-83-59-239.compute-1.amazonaws.com:5432/d2bcdf6p3144qq');
 
 return [
 
