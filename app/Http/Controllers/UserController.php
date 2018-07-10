@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -38,7 +39,36 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        // $users = User::all();
+        return response()->json($user->load('roles'), 200);
+    }
+
+    public function me() 
+    {
+        return response()->json(\Auth::user());
+    }
+
+    public function verify(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'confirmed' => 'required|boolean',
+            'userId' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors(),
+                'status_code' => 422
+            ], 422);
+        }
+
+        $user = User::find($request->input('userId'));
+        $user->confirmed = $request->input('confirmed');
+        $user->save();
+
+        return response()->json([
+            'message' => 'Succesfully verified user',
+            'data' => $user->fresh()->load('roles')
+        ], 200);
     }
 
     /**
@@ -50,6 +80,8 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        // $this->authorize('update', $user);
+        dd(auth());
         $validator = Validator::make($request->all(), [
             'email' => 'email',
             'password' => 'string', 
@@ -63,7 +95,6 @@ class UserController extends Controller
             'country' => 'string',
             'phone' => 'string',
             'date_of_birth' => 'date',
-            'confirmed' => 'boolean',
             'username' => 'string|max:255',
             'email' => 'string|email|max:255|unique:users',
         ]);
@@ -75,13 +106,38 @@ class UserController extends Controller
             ], 422);
         }
 
-        $user = $user->update($request->all());
+        $user->update($request->all());
 
         return response()->json([
             'message' => 'Successfully updated !',
-            'data' => $user
+            'data' => $user->fresh()->load('roles')
         ]);
 
+    }
+
+    public function updateRoles(Request $request) {
+
+        $validator = Validator::make($request->all(), [
+            'roleNames' => 'required|array',
+            'userId' => 'required|integer', 
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors(),
+                'status_code' => 422
+            ], 422);
+        }
+
+        $user = User::find($request->input('userId'));
+        $roleNames = $request->input('roleNames');
+
+        $user->syncRoles($roleNames);
+
+        return response()->json([
+            'message' => 'succesfully updated user',
+            'data' => $user->fresh()->load('roles')
+        ], 200);
     }
 
     /**

@@ -33,7 +33,7 @@ return [
     |
     */
 
-    'ttl' => 60,
+    'ttl' => 90000000060,
 
     /*
     |--------------------------------------------------------------------------
@@ -156,7 +156,7 @@ return [
         |
         */
 
-        'auth' => 'Tymon\JWTAuth\Providers\Auth\IlluminateAuthAdapter',
+        'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,
 
         /*
         |--------------------------------------------------------------------------

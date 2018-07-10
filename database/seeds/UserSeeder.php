@@ -14,8 +14,8 @@ class UserSeeder extends Seeder
     {
         factory(App\User::class, 50)->create()->each(function ($u, $index) {
             $roleName = $index === 0 ? 'admin' : 'regular';
-            $role = Role::whereName($roleName)->first();
-            $u->assignRole($role);
+            // $role = Role::whereName($roleName)->first();
+            $u->assignRole($roleName);
         });
     }
 }

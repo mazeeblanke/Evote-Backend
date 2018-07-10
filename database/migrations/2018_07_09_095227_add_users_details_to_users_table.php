@@ -14,17 +14,17 @@ class AddUsersDetailsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('firstname');
-            $table->string('lastname');
+            $table->string('firstname')->nullable();
+            $table->string('lastname')->nullable();
             $table->json('security_question')->nullable();
-            $table->string('address');
-            $table->string('city');
-            $table->string('state');
-            $table->string('country');
-            $table->string('phone');
-            $table->string('next_of_kin');
-            $table->date('date_of_birth');
-            $table->boolean('confirmed');
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('country')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('next_of_kin')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->boolean('confirmed')->default(true);
         });
     }
 

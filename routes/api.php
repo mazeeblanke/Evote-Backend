@@ -19,7 +19,10 @@ use Illuminate\Http\Request;
 
 Route::post('/signup', 'SignupController@create');
 Route::post('/login', 'LoginController@create');
+Route::patch('/updateUserRoles', 'UserController@updateRoles'); //to be protected by middleware
+Route::middleware('authenticate')->patch('/verifyUser', 'UserController@verify'); //to be protected by middleware
+Route::middleware('authenticate')->get('/me', 'UserController@me'); //to be protected by middleware
 
-Route::resources([
+Route::apiResources([
     'users' => 'UserController'
 ]);
