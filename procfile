@@ -1,0 +1,2 @@
+release: php artisan migrate
+web: php artisan serve
