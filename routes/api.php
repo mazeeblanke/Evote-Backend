@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,5 +22,8 @@ Route::middleware('authenticate')->patch('/verifyUser', 'UserController@verify')
 Route::middleware('authenticate')->get('/me', 'UserController@me'); //to be protected by middleware
 
 Route::apiResources([
-    'users' => 'UserController'
+    'users' => 'UserController',
+    'campaigns' => 'CampaignController',
+    'campaign-positions' => 'CampaignPositionController',
+    'campaign-position-norminations' => 'CampaignPositionNorminationController'
 ]);

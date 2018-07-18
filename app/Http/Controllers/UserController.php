@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -13,9 +14,24 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
+        $page = $request->page ?: 1;
+        $limit = $request->limit ?: 10;
+        $builder = User::query();
+
+        if ($search = $request->search) {
+            $columns = ['email', 'username'];
+            foreach($columns as $column){
+                $builder = $builder->orWhere($column, 'LIKE', '%' . $search . '%');
+            }
+        }
+
+        if ($confirmed = $request->confirmed) {
+            $builder = $builder->whereConfirmed($confirmed);
+        }
+
+        $users = $builder->orderBy('id', 'desc')->paginate($limit, ['*'], 'page', $page);
         return response()->json($users, 200);
     }
 
@@ -39,11 +55,10 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        // $users = User::all();
         return response()->json($user->load('roles'), 200);
     }
 
-    public function me() 
+    public function me()
     {
         return response()->json(\Auth::user());
     }
@@ -81,14 +96,14 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         // $this->authorize('update', $user);
-        dd(auth());
+        // dd(auth());
         $validator = Validator::make($request->all(), [
             'email' => 'email',
-            'password' => 'string', 
+            'password' => 'string',
             'username' => 'string',
             'firstname' => 'string',
             'lastname' => 'string',
-            'security_question' => 'json',
+            // 'security_question' => 'json',
             'address' => 'string',
             'city' => 'string',
             'state' => 'string',
@@ -96,7 +111,7 @@ class UserController extends Controller
             'phone' => 'string',
             'date_of_birth' => 'date',
             'username' => 'string|max:255',
-            'email' => 'string|email|max:255|unique:users',
+            'email' => 'string|email|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -119,7 +134,7 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'roleNames' => 'required|array',
-            'userId' => 'required|integer', 
+            'userId' => 'required|integer',
         ]);
 
         if ($validator->fails()) {

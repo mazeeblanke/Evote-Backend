@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class LoginController extends Controller
+class VoteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -23,17 +23,7 @@ class LoginController extends Controller
      */
     public function create()
     {
-
-        if (! $token = auth()->attempt(request(['email', 'password']))) {
-            return response()->json(['error' => 'Unauthorized', 'message' => 'Wrong username or password'], 401);
-        }
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
-
+        //
     }
 
     /**

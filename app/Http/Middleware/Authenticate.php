@@ -37,7 +37,10 @@ class Authenticate
 
         } catch (JWTException $e) {
 
-            return response()->json(['message' => 'token_absent'], 422);
+            return response()->json([
+                'message' => 'token_absent',
+                'code' => 450
+            ], 422);
 
         }
 

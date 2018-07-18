@@ -19,12 +19,13 @@ class AddUsersDetailsToUsersTable extends Migration
             $table->json('security_question')->nullable();
             $table->string('address')->nullable();
             $table->string('city')->nullable();
+            $table->string('avatar')->nullable();
             $table->string('state')->nullable();
             $table->string('country')->nullable();
             $table->string('phone')->nullable();
             $table->string('next_of_kin')->nullable();
             $table->date('date_of_birth')->nullable();
-            $table->boolean('confirmed')->default(true);
+            $table->boolean('confirmed')->default(false);
         });
     }
 
