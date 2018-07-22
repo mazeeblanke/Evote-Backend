@@ -15,9 +15,18 @@ class CampaignController extends Controller
      */
     public function index(Request $request)
     {
-        $page = $request->input('page') ?: 1;
-        $limit = $request->input('limit') ?: 10;
-        $campaigns = Campaign::paginate($limit, ['*'], 'page', $page);
+        $page = $request->page ?: 1;
+        $limit = $request->limit ?: 10;
+        $builder = Campaign::query();
+
+        if ($search = $request->search) {
+            $columns = ['name', 'description'];
+            foreach($columns as $column){
+                $builder = $builder->orWhere($column, 'LIKE', '%' . $search . '%');
+            }
+        }
+
+        $campaigns = $builder->orderBy('id', 'desc')->paginate($limit, ['*'], 'page', $page);
         return response()->json($campaigns, 200);
     }
 
@@ -59,9 +68,13 @@ class CampaignController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $campaign = Campaign::with(['campaign_positions.norminations.votee'])
-                            ->where('id', $id)
-                            ->first();
+        $campaign = Campaign::with([
+            'campaign_positions' => function ($query) {
+                $query->with('norminations.votee')->orderBy('id', 'desc');
+            }
+        ])
+        ->where('id', $id)
+        ->first();
         return response()->json([
             'message' => 'Succesfully fetched results',
             'data' => $campaign
@@ -78,10 +91,10 @@ class CampaignController extends Controller
     public function update(Request $request, Campaign $campaign)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:campaigns',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date'
+            'name' => 'string|max:255',
+            'description' => 'string',
+            'start_date' => 'date',
+            'end_date' => 'date'
         ]);
 
         if ($validator->fails()) {

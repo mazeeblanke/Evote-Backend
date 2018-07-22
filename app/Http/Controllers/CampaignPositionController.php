@@ -103,7 +103,7 @@ class CampaignPositionController extends Controller
 
         return response()->json([
             'message' => 'Successfully updated !',
-            'data' => $campaignPosition->fresh()
+            'data' => $campaignPosition->fresh()->load(['norminations.votee'])
         ]);
     }
 
