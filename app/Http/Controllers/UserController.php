@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 // use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Controller for user
+ */
 class UserController extends Controller
 {
     /**
@@ -18,16 +21,31 @@ class UserController extends Controller
     {
         $page = $request->page ?: 1;
         $limit = $request->limit ?: 10;
-        $builder = User::query();
+        $campaignId = $request->campaignId;
+        $search = $request->search;
+        $available = $request->available; // 1 for available, 0 for not available
+        $builder = User::query()->with('norminations');
+        $columns = ['email', 'username'];
 
-        if ($search = $request->search) {
-            $columns = ['email', 'username'];
-            foreach($columns as $column){
-                $builder = $builder->orWhere($column, 'LIKE', '%' . $search . '%');
-            }
+        if ($search)
+        {
+            $builder = $builder->where(function($query) use($columns, $search) {
+                foreach($columns as $column){
+                    $query = $query->orWhere($column, 'LIKE', '%' . $search . '%');
+                }
+            });
         }
 
-        if ($confirmed = $request->confirmed) {
+        if ($campaignId)
+        {
+            $builder = $builder
+            ->whereDoesntHave('norminations', function($query) use ($campaignId) {
+                $query->where('campaign_id', '=', $campaignId);
+            });
+        }
+
+        if ($confirmed = $request->confirmed)
+        {
             $builder = $builder->whereConfirmed($confirmed);
         }
 

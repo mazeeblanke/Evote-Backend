@@ -54,7 +54,7 @@ class CampaignPositionController extends Controller
         $campaignPosition = $campaign
                             ->campaign_positions()
                             ->createMany($request->positions)
-                            ->load(['campaign']);
+                            ->load(['campaign', 'norminations.votee']);
 
         return response()->json([
             'message' => 'Successfully Created',

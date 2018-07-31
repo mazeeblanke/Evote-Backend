@@ -14,6 +14,7 @@ class Campaign extends Model
      */
     protected $fillable = [
         'name',
+        'active',
         'description',
         'start_date',
         'end_date'

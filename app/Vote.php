@@ -12,9 +12,15 @@ class Vote extends Model
      * @var array
      */
     protected $fillable = [
-        'votee_id',
-        'campaign_position_id',
-        'campaign_id',
+        'normination_id',
+        // 'votee_id',
+        // 'campaign_position_id',
+        // 'campaign_id',
         'voter_id'
     ];
+
+    public function normination()
+    {
+        return $this->hasOne(CampaignPositionNormination::class, 'id', 'normination_id');
+    }
 }

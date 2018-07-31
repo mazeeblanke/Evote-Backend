@@ -97,6 +97,8 @@ class CampaignController extends Controller
             'end_date' => 'date'
         ]);
 
+        //if no normination and at least one norminee/votee and active is true throw validation error
+
         if ($validator->fails()) {
             return response()->json([
                 'message' => $validator->errors(),

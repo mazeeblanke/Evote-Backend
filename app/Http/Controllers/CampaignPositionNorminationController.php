@@ -105,8 +105,40 @@ class CampaignPositionNorminationController extends Controller
      * @param  \App\CampaignPositionNormination  $campaignPositionNormination
      * @return \Illuminate\Http\Response
      */
-    public function destroy(CampaignPositionNormination $campaignPositionNormination)
+    public function destroy(Request $request, int $campaign_position_id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'campaign_position_id' => 'required|integer',
+            'votee_id' => 'required|integer',
+            'campaign_id' => 'required|integer'
+        ]);
+
+        // dd($request->all());
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors(),
+                'status_code' => 422
+            ], 422);
+        }
+
+        $CampaignPositionNormination = CampaignPositionNormination::whereCampaignPositionId($request->campaign_position_id)
+                ->whereVoteeId($request->votee_id)
+                ->whereCampaignId($request->campaign_id);
+
+        // dd($request->campaign_id);
+        // dd($CampaignPositionNormination->exists());
+
+        if ($CampaignPositionNormination->exists()) {
+            $CampaignPositionNormination->delete();
+            return response()->json([
+                'message' => 'Successfully deleted'
+            ], 202);
+        }  else {
+            return response()->json([
+                'message' => 'Could not delete, an error occurred because data does not exist',
+            ], 422);
+        }
+
     }
 }

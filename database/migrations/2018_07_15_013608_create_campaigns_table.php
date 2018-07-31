@@ -17,6 +17,7 @@ class CreateCampaignsTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->text('description');
+            $table->boolean('active')->default(false);
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
+use App\Vote;
+use App\Campaign;
 use Illuminate\Http\Request;
 
 class VoteController extends Controller
@@ -16,15 +19,6 @@ class VoteController extends Controller
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -34,7 +28,18 @@ class VoteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = auth()->user();
+        $user->votes()->createMany($request->votes);
+        // dd($user->votes);
+        // $votes = $request->votes;
+        $user = User::with(['votes.normination' => function($query) use($request) {
+            $query->with(['votee', 'campaign_position'])->where('campaign_id', $request->campaign_id);
+        }])->whereId($user->id)->first();
+        // dd($user);
+        return response()->json([
+            'data' =>  $user
+        ]);
+
     }
 
     /**
@@ -43,21 +48,48 @@ class VoteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function liveVote(Request $request)
     {
-        //
+        $castedVotes = null;
+        $loggedInUser = auth()->user();
+        $campaign = Campaign::with([
+            'campaign_positions' => function ($query) {
+                $query->with('norminations.votee')->orderBy('id', 'desc');
+            }
+        ])
+        ->whereActive(1)
+        ->first();
+        $norminationIds = collect($campaign['campaign_positions'])->map(function($p) {
+            return $p['norminations']->map(function($n) {
+                return $n->id;
+            })->toArray();
+        })->toArray();
+        if ($campaign) {
+
+            $norminationIds = array_merge(...$norminationIds);
+            $loggedinHasVoted = Vote::whereVoterId($loggedInUser->id)
+            ->whereIn('normination_id', $norminationIds)
+            ->exists();
+            // dd($campaign);
+            if ($loggedinHasVoted)
+            {
+                // $castedVotes = Vote::whereVoterId($loggedInUser->id)->get();
+                $castedVotes = Vote::whereHas('normination', function($query) use($campaign) {
+                    $query->where('campaign_id', $campaign->id);
+                })->with(['normination' => function($query) use($campaign) {
+                    $query->with(['votee', 'campaign_position'])->where('campaign_id', $campaign->id);
+                }])->whereVoterId($loggedInUser->id)->get();
+                // dd($castedVotes);
+            };
+
+        }
+        return response()->json([
+            'message' => 'Succesfully fetched results',
+            'campaign' => $campaign,
+            'votes' => $castedVotes
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.

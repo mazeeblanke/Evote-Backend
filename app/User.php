@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\CampaignPositionNormination;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -54,6 +55,16 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function norminations()
+    {
+        return $this->hasMany(CampaignPositionNormination::class, 'votee_id');
+    }
+
+    public function votes()
+    {
+        return $this->hasMany(Vote::class, 'voter_id');
     }
 
 }
