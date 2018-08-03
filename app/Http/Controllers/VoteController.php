@@ -30,14 +30,18 @@ class VoteController extends Controller
     {
         $user = auth()->user();
         $user->votes()->createMany($request->votes);
-        // dd($user->votes);
-        // $votes = $request->votes;
-        $user = User::with(['votes.normination' => function($query) use($request) {
-            $query->with(['votee', 'campaign_position'])->where('campaign_id', $request->campaign_id);
+
+        $user = User::with(['votes' => function($query) use($request) {
+            $query->whereHas('normination', function ($query) use ($request) {
+                $query->where('campaign_id', $request->campaign_id);
+            })->with(['normination' => function($query) use ($request) {
+                $query->with(['votee', 'campaign_position'])->where('campaign_id', $request->campaign_id);
+            }]);
         }])->whereId($user->id)->first();
-        // dd($user);
+
         return response()->json([
-            'data' =>  $user
+            'data' =>  $user,
+            'message' => 'Successfully voted!'
         ]);
 
     }
@@ -70,16 +74,15 @@ class VoteController extends Controller
             $loggedinHasVoted = Vote::whereVoterId($loggedInUser->id)
             ->whereIn('normination_id', $norminationIds)
             ->exists();
-            // dd($campaign);
+
             if ($loggedinHasVoted)
             {
-                // $castedVotes = Vote::whereVoterId($loggedInUser->id)->get();
                 $castedVotes = Vote::whereHas('normination', function($query) use($campaign) {
                     $query->where('campaign_id', $campaign->id);
                 })->with(['normination' => function($query) use($campaign) {
                     $query->with(['votee', 'campaign_position'])->where('campaign_id', $campaign->id);
                 }])->whereVoterId($loggedInUser->id)->get();
-                // dd($castedVotes);
+
             };
 
         }

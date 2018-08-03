@@ -113,8 +113,13 @@ class CampaignPositionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(CampaignPosition $campaignPosition)
     {
-        //
+        if ($campaignPosition->delete())
+        {
+            return response()->json([
+                'message' => 'Successfully deleted'
+            ], 202);
+        }
     }
 }

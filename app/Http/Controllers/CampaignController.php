@@ -120,8 +120,55 @@ class CampaignController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Campaign $campaign)
     {
-        //
+        if ($campaign->delete())
+        {
+            return response()->json([
+                'message' => 'Successfully deleted'
+            ], 202);
+        }
+
     }
+
+
+    /**
+     *
+     * Set an active campaign
+     *
+     */
+    public function setActiveCampaign(Request $request)
+    {
+       $builder = Campaign::whereId($request->campaignId);
+       $data = null;
+
+       $campaign = $builder
+        ->has('campaign_positions')
+        ->withCount('campaign_positions')
+        ->with(['campaign_positions' => function ($query) {
+            $query->whereHas('norminations');
+        }])->first();
+
+        if (!$campaign) {
+            $status = 401;
+            $message = 'At least one campaign position must be created';
+        } else if (
+           (int) $campaign->campaign_positions_count !==
+           $campaign->campaign_positions->count()
+        ) {
+            $status = 401;
+            $message = 'At least one normainations has to be made for every campaign position';
+        } else if ($campaign->update(['active' => 1])) {
+            $campaign->where('id', '!=', $request->campaignId)->update(['active' => 0]);
+            $status = 201;
+            $message = 'Campaign successfully set as active';
+            $data = $campaign->fresh();
+        };
+
+        return response()->json([
+            'message' => $message,
+            'data'    => $data
+        ], $status);
+    }
+
 }

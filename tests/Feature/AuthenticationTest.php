@@ -13,12 +13,15 @@ class Authentication extends TestCase
      *
      * @return void
      */
-    public function testUsersCanSignup()
+    public function testUserRecievesErrorsForMissingSignupFormFields()
     {
-        $response = $this->post('/api/signup');
+        $response = $this->post('api/signup');
 
-        // dd($response);
-
-        $response->assertStatus(200);
+        $response
+            ->assertJsonFragment([
+                "username" => ["The username field is required."],
+                "email" => ["The email field is required."]
+            ])
+            ->assertStatus(422);
     }
 }
