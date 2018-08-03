@@ -22,6 +22,7 @@ Route::patch('/updateUserRoles', 'UserController@updateRoles'); //to be protecte
 Route::middleware('authenticate')->patch('/verifyUser', 'UserController@verify'); //to be protected by middleware
 Route::middleware('authenticate')->get('/me', 'UserController@me'); //to be protected by middleware
 Route::post('/campaigns/setActiveCampaign', 'CampaignController@setActiveCampaign'); //to be protected by middleware
+Route::post('/campaigns/disableActiveCampaign', 'CampaignController@disableActiveCampaign'); //to be protected by middleware
 
 Route::apiResources([
     'users' => 'UserController',

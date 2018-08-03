@@ -132,6 +132,20 @@ class CampaignController extends Controller
     }
 
 
+    public function disableActiveCampaign (Request $request) {
+        if (Campaign::whereActive(1)->update(['active' => 0]))
+        {
+            return response()->json([
+                'message' => 'Successfully disabled active campaign'
+            ], 202);
+        }
+
+        return response()->json([
+            'message' => 'Unable to disable active campaign'
+        ], 400);
+
+    }
+
     /**
      *
      * Set an active campaign
@@ -157,7 +171,7 @@ class CampaignController extends Controller
            $campaign->campaign_positions->count()
         ) {
             $status = 401;
-            $message = 'At least one normainations has to be made for every campaign position';
+            $message = 'At least one normination has to be made for every campaign position';
         } else if ($campaign->update(['active' => 1])) {
             $campaign->where('id', '!=', $request->campaignId)->update(['active' => 0]);
             $status = 201;
