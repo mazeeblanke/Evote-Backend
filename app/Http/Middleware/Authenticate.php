@@ -20,11 +20,11 @@ class Authenticate
      */
     public function handle($request, Closure $next)
     {
-        // dd('sdnsd');
+
         try {
 
-            if (!$user = \JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['user_not_found'], 404);
+            if (!$user = $request->user() ?: \JWTAuth::parseToken()->authenticate() ) {
+                return response()->json(['message' => 'you are not logged in!'], 401);
             }
 
         } catch (TokenExpiredException $e) {
@@ -44,11 +44,6 @@ class Authenticate
 
         }
 
-        // dd($user);
-        // dd(\Auth::user());
-
-        // the token is valid and we have found the user via the sub claim
-        // return response()->json(compact('user'));
         return $next($request);
     }
 }

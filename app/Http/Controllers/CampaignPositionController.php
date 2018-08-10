@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Campaign;
 use App\CampaignPosition;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -35,11 +36,22 @@ class CampaignPositionController extends Controller
      */
     public function store(Request $request)
     {
+        $campaign = Campaign::whereId($request->campaign_id)->first();
+
         $validator = Validator::make($request->all(), [
             'positions' => 'required|array',
             'campaign_id' => 'required|integer',
-            'positions.*.name' => 'required|string|max:255|unique:campaign_positions',
+            'positions.*.name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('campaign_positions')->where(function ($query) use ($campaign) {
+                    return $query->where('campaign_id', $campaign->id);
+                })
+            ],
             'positions.*.description' => 'required|string',
+        ], [
+            'positions.*.name.unique'    => 'This campaign position name has already been taken for this campaign.',
         ]);
 
         if ($validator->fails()) {
@@ -48,8 +60,6 @@ class CampaignPositionController extends Controller
                 'status_code' => 422
             ], 422);
         }
-
-        $campaign = Campaign::whereId($request->campaign_id)->first();
 
         $campaignPosition = $campaign
                             ->campaign_positions()

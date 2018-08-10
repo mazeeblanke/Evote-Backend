@@ -17,77 +17,73 @@ class CampaignTest extends TestCase
     use RefreshDatabase;
 
 
-    // /**
-    //  *
-    //  *
-    //  * @return void
-    //  */
-    // public function testACampaignWithoutACampaignpositionCannotBeSetAsActive()
-    // {
+    public function testACampaignWithoutACampaignpositionCannotBeSetAsActive()
+    {
 
-    //     $user = factory(User::class)->create();
+        $user = factory(User::class)->create();
 
-    //     $campaign = factory(Campaign::class)->create();
+        $campaign = factory(Campaign::class)->create();
 
-    //     $response = $this
-    //         ->actingAs($user)
-    //         ->json('POST', 'api/campaigns/setActiveCampaign', [
-    //             'campaignId' => $campaign->id
-    //         ]);
+        $response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', 'api/campaigns/setActiveCampaign', [
+                'campaignId' => $campaign->id
+            ]);
 
-    //     $response
-    //         ->assertStatus(401)
-    //         ->assertJsonFragment([
-    //             'message' => 'At least one campaign position must be created'
-    //         ]);
-    // }
+        $response
+            ->assertStatus(401)
+            ->assertJsonFragment([
+                'message' => 'At least one campaign position must be created'
+            ]);
+    }
 
 
 
-    // /**
-    //  *
-    //  *
-    //  * @return void
-    //  */
-    // public function testACampaignHavingACampaignPositionWithoutANorminationCannotBeSetAsActive()
-    // {
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testACampaignHavingACampaignPositionWithoutANorminationCannotBeSetAsActive()
+    {
 
-    //     $user = factory(User::class)->create();
+        $user = factory(User::class)->create();
 
-    //     $campaign = factory(Campaign::class)->create();
+        $campaign = factory(Campaign::class)->create();
 
-    //     $campaignPositions = $campaign
-    //         ->campaign_positions()
-    //         ->saveMany(
-    //             factory(CampaignPosition::class, 5)
-    //                 ->create([ 'campaign_id' => $campaign->id])
-    //                 ->each(function($campaignPosition, $i) use ($campaign) {
-    //                     if ($i < 3) {
-    //                         $campaignPosition
-    //                         ->norminations()
-    //                         ->saveMany(
-    //                             factory(CampaignPositionNormination::class, 5)->create([
-    //                                 'votee_id' => 1,
-    //                                 'campaign_position_id' => $campaignPosition->id,
-    //                                 'campaign_id' => $campaign->id
-    //                             ])
-    //                         );
-    //                     }
-    //                 })
-    //         );
+        $campaignPositions = $campaign
+            ->campaign_positions()
+            ->saveMany(
+                factory(CampaignPosition::class, 5)
+                    ->create([ 'campaign_id' => $campaign->id])
+                    ->each(function($campaignPosition, $i) use ($campaign) {
+                        if ($i < 3) {
+                            $campaignPosition
+                            ->norminations()
+                            ->saveMany(
+                                factory(CampaignPositionNormination::class, 5)->create([
+                                    'votee_id' => 1,
+                                    'campaign_position_id' => $campaignPosition->id,
+                                    'campaign_id' => $campaign->id
+                                ])
+                            );
+                        }
+                    })
+            );
 
-    //     $response = $this
-    //         ->actingAs($user)
-    //         ->json('POST', 'api/campaigns/setActiveCampaign', [
-    //             'campaignId' => $campaign->id
-    //         ]);
+        $response = $this
+            ->actingAs($user)
+            ->json('POST', 'api/campaigns/setActiveCampaign', [
+                'campaignId' => $campaign->id
+            ]);
 
-    //     $response
-    //         ->assertStatus(401)
-    //         ->assertJsonFragment([
-    //             'message' => 'At least one normainations has to be made for every campaign position'
-    //         ]);
-    // }
+        $response
+            ->assertStatus(401)
+            ->assertJsonFragment([
+                'message' => 'At least one normination has to be made for every campaign position',
+                'data' => null
+            ]);
+    }
 
 
     /**

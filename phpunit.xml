@@ -13,6 +13,18 @@
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
 
+        <testsuite name="Authentication">
+            <file suffix="AuthenticationTest.php">./tests/Feature/AuthenticationTest.php</file>
+        </testsuite>
+
+        <testsuite name="Campaign">
+            <file suffix="CampaignTest.php">./tests/Feature/CampaignTest.php</file>
+        </testsuite>
+
+        <testsuite name="CampaignPosition">
+            <file suffix="CampaignPositionTest.php">./tests/Feature/CampaignPositionTest.php</file>
+        </testsuite>
+
         <testsuite name="Unit">
             <directory suffix="Test.php">./tests/Unit</directory>
         </testsuite>

@@ -17,17 +17,21 @@
 
 Route::post('/signup', 'SignupController@create');
 Route::post('/login', 'LoginController@create');
-Route::get('/votes/liveVote', 'VoteController@liveVote');
+
 Route::patch('/updateUserRoles', 'UserController@updateRoles'); //to be protected by middleware
 Route::middleware('authenticate')->patch('/verifyUser', 'UserController@verify'); //to be protected by middleware
 Route::middleware('authenticate')->get('/me', 'UserController@me'); //to be protected by middleware
-Route::post('/campaigns/setActiveCampaign', 'CampaignController@setActiveCampaign'); //to be protected by middleware
-Route::post('/campaigns/disableActiveCampaign', 'CampaignController@disableActiveCampaign'); //to be protected by middleware
 
-Route::apiResources([
-    'users' => 'UserController',
-    'campaigns' => 'CampaignController',
-    'campaign-positions' => 'CampaignPositionController',
-    'campaign-position-norminations' => 'CampaignPositionNorminationController',
-    'votes' => 'VoteController'
-]);
+
+Route::group([ 'middleware' => ['authenticate']], function() {
+    Route::get('/votes/liveVote', 'VoteController@liveVote');
+    Route::post('/campaigns/setActiveCampaign', 'CampaignController@setActiveCampaign'); //to be protected by middleware
+    Route::post('/campaigns/disableActiveCampaign', 'CampaignController@disableActiveCampaign'); //to be protected by middleware
+    Route::apiResources([
+        'users' => 'UserController',
+        'campaigns' => 'CampaignController',
+        'campaign-positions' => 'CampaignPositionController',
+        'campaign-position-norminations' => 'CampaignPositionNorminationController',
+        'votes' => 'VoteController'
+    ]);
+});

@@ -24,7 +24,7 @@ class UserController extends Controller
         $campaignId = $request->campaignId;
         $search = $request->search;
         $available = $request->available; // 1 for available, 0 for not available
-        $builder = User::query()->with('norminations');
+        $builder = User::query()->with(['norminations', 'roles']);
         $columns = ['email', 'username'];
 
         if ($search)
@@ -78,30 +78,42 @@ class UserController extends Controller
 
     public function me()
     {
-        return response()->json(\Auth::user());
+        return response()->json(\Auth::user()->load(['roles']));
     }
 
-    public function verify(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'confirmed' => 'required|boolean',
-            'userId' => 'required|integer'
-        ]);
+    public function verify(Request $request)
+    {
+        $data = null;
+        $statusCode = 422;
+        $message = 'You are not authorized';
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => $validator->errors(),
-                'status_code' => 422
-            ], 422);
+        if ($request->user()->can('verify', User::class)){
+
+            $validator = Validator::make($request->all(), [
+                'confirmed' => 'required|boolean',
+                'userId' => 'required|integer'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => $validator->errors(),
+                    'status_code' => 422
+                ], 422);
+            }
+
+            $user = User::find($request->input('userId'));
+            $user->confirmed = $request->input('confirmed');
+            $user->save();
+            $message = 'Succesfully verified user';
+            $data = $user->fresh()->load('roles');
+            $statusCode = 200;
         }
 
-        $user = User::find($request->input('userId'));
-        $user->confirmed = $request->input('confirmed');
-        $user->save();
-
         return response()->json([
-            'message' => 'Succesfully verified user',
-            'data' => $user->fresh()->load('roles')
-        ], 200);
+            'message' => $message,
+            'data' => $data
+        ], $statusCode);
+
     }
 
     /**
@@ -111,25 +123,26 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $userId)
     {
-        // $this->authorize('update', $user);
-        // dd(auth());
+
         $validator = Validator::make($request->all(), [
-            'email' => 'email',
-            'password' => 'string',
-            'username' => 'string',
-            'firstname' => 'string',
-            'lastname' => 'string',
+            'email' => 'sometimes|required|email',
+            'password' => 'sometimes|required|string',
+            'username' => 'sometimes|required|string',
+            'firstname' => 'sometimes|required|string',
+            'lastname' => 'sometimes|required|string',
             // 'security_question' => 'json',
-            'address' => 'string',
-            'city' => 'string',
-            'state' => 'string',
-            'country' => 'string',
-            'phone' => 'string',
-            'date_of_birth' => 'date',
-            'username' => 'string|max:255',
-            'email' => 'string|email|max:255',
+            'address' => 'sometimes|required|string',
+            'city' => 'sometimes|required|string',
+            'state' => 'sometimes|required|string',
+            'country' => 'sometimes|required|string',
+            'phone' => 'sometimes|required|string',
+            'date_of_birth' => 'sometimes|required|date',
+            'username' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255',
+            'role'  => 'sometimes|Array',
+            'confirmed' => 'sometimes|required|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -139,12 +152,42 @@ class UserController extends Controller
             ], 422);
         }
 
-        $user->update($request->all());
+        if ($user = User::whereId($userId)->first()){
 
-        return response()->json([
-            'message' => 'Successfully updated !',
-            'data' => $user->fresh()->load('roles')
-        ]);
+            $payload = $request->except(['confirmed']);
+
+            $hasAdminRole = $request->user()->can('performAdminRole', User::class);
+
+            if ($hasAdminRole){
+
+                if ($request->has('confirmed')) {
+                    $payload = array_merge($request->only('confirmed'), $payload);
+                }
+
+                if ($request->roles && count($request->roles) >= 1) {
+                    $user->syncRoles($request->roles);
+                }
+            }
+
+            if (!$hasAdminRole && ($request->roles || $request->confirmed)) {
+                return response()->json([
+                    'message' => 'You are not authorized!!'
+                ], 422);
+            }
+
+            $user->update($payload);
+
+            return response()->json([
+                'message' => 'Successfully updated !',
+                'data' => $user->fresh()->load('roles')
+            ]);
+
+        } else {
+            return response()->json([
+                'message' => 'Could not be updated ! User not found'
+            ]);
+        }
+
 
     }
 

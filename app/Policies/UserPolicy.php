@@ -33,16 +33,27 @@ class UserPolicy
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determine whether the user can verify another user.
      *
      * @param  \App\User  $user
-     * @param  \App\User  $model
      * @return mixed
      */
-    public function update(User $user, User $model)
+    public function verify(User $user)
     {
-        return true;
-        // return $user->id === $model->id;
+        // return true;
+        dd($user->hasRole('admin'));
+        return $user->hasRole('admin');
+    }
+
+    /**
+     * Determine whether the user can update role.
+     *
+     * @param  \App\User  $user
+     * @return mixed
+     */
+    public function performAdminRole(User $user)
+    {
+        return $user->hasRole('admin');
     }
 
     /**

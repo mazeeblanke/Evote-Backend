@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Campaign extends Model
 {
+
+    public function getActiveAttribute($value)
+    {
+        return (boolean) $value;
+    }
+
     /**
      * The attributes that are mass assignable.
      *
