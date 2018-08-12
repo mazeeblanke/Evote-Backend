@@ -25,6 +25,7 @@ Route::middleware('authenticate')->get('/me', 'UserController@me'); //to be prot
 
 Route::group([ 'middleware' => ['authenticate']], function() {
     Route::get('/votes/liveVote', 'VoteController@liveVote');
+    Route::get('/votes/voteResults', 'VoteController@voteResults');
     Route::post('/campaigns/setActiveCampaign', 'CampaignController@setActiveCampaign'); //to be protected by middleware
     Route::post('/campaigns/disableActiveCampaign', 'CampaignController@disableActiveCampaign'); //to be protected by middleware
     Route::apiResources([

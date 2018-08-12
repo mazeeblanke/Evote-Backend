@@ -6,6 +6,7 @@ use App\User;
 use App\Vote;
 use App\Campaign;
 use Illuminate\Http\Request;
+use App\CampaignPositionNormination;
 
 class VoteController extends Controller
 {
@@ -104,6 +105,57 @@ class VoteController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    public function voteResults(Request $request)
+    {
+        $results = CampaignPositionNormination::with([
+            'campaign_position:id,name',
+            'campaign:id,name',
+            'votee:id,username'
+        ])
+        ->whereHas('campaign', function($query) {
+            $query->whereActive(1);
+        })
+        ->withCount('votes')
+        ->get();
+
+        if ($results->count() > 0) {
+            $campaignName = $results->first()->campaign->name;
+            $results = $results
+                ->map(function($item) {
+                    return [
+                        'votes_count' => $item->votes_count,
+                        'contestant' => $item->votee->username,
+                        'campaign_position_name' => $item->campaign_position->name
+                    ];
+                })
+                ->groupBy(function($item, $key) {
+                    return $item['campaign_position_name'];
+                })
+                ->map(function($item, $key) {
+                    return array_merge(
+                        $item->mapToGroups(function ($item, $key) {
+                            return [
+                                'votes_count' => $item['votes_count']
+                            ];
+                        })->toArray(),
+                        $item->mapToGroups(function ($item, $key) {
+                            return [
+                                'contestants' => $item['contestant']
+                            ];
+                        })->toArray()
+                    );
+                });
+        }
+
+        return response()->json([
+            'message' => 'Successfully fetched vote results',
+            'data' => array_merge(
+                $results->toArray(),
+                [ 'campaignName' => $campaignName ]
+                )
+        ], 200);
     }
 
 

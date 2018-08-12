@@ -21,6 +21,10 @@
             <file suffix="CampaignTest.php">./tests/Feature/CampaignTest.php</file>
         </testsuite>
 
+        <testsuite name="Vote">
+            <file suffix="VoteTest.php">./tests/Feature/VoteTest.php</file>
+        </testsuite>
+
         <testsuite name="CampaignPosition">
             <file suffix="CampaignPositionTest.php">./tests/Feature/CampaignPositionTest.php</file>
         </testsuite>

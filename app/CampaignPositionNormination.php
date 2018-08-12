@@ -3,6 +3,7 @@
 namespace App;
 
 use App\User;
+use App\Vote;
 use App\Campaign;
 use App\CampaignPosition;
 use Illuminate\Database\Eloquent\Model;
@@ -34,4 +35,9 @@ class CampaignPositionNormination extends Model
     {
         return $this->belongsTo(CampaignPosition::class);
     }
+
+    public function votes() {
+        return $this->hasMany(Vote::class, 'normination_id', 'id');
+    }
+
 }
