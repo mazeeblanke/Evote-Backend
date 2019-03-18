@@ -2,8 +2,9 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\Authenticate as Auth;
 use Illuminate\Auth\Middleware\Authenticate;
+use App\Http\Middleware\Authenticate as Auth;
+use App\Http\Middleware\ModifyHeadersMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -22,6 +23,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
         \Barryvdh\Cors\HandleCors::class,
+        ModifyHeadersMiddleware::class
     ];
 
     /**

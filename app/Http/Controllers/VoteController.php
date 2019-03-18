@@ -53,7 +53,7 @@ class VoteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function liveVote(Request $request)
+    public function liveVote(Request $request, $id)
     {
         $castedVotes = null;
         $loggedInUser = auth()->user();
@@ -63,6 +63,7 @@ class VoteController extends Controller
             }
         ])
         ->whereActive(1)
+        ->whereId($id)
         ->first();
         $norminationIds = collect($campaign['campaign_positions'])->map(function($p) {
             return $p['norminations']->map(function($n) {
@@ -107,15 +108,16 @@ class VoteController extends Controller
         //
     }
 
-    public function voteResults(Request $request)
+    public function voteResults(Request $request, $id)
     {
         $results = CampaignPositionNormination::with([
             'campaign_position:id,name',
             'campaign:id,name',
             'votee:id,username'
         ])
-        ->whereHas('campaign', function($query) {
-            $query->whereActive(1);
+        ->whereHas('campaign', function($query) use ($id) {
+            // $query->whereActive(1)->whereId($id);
+            $query->whereId($id);
         })
         ->withCount('votes')
         ->get();

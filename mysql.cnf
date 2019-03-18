@@ -1,0 +1,4 @@
+[mysqld]
+general_log = 1
+
+innodb_buffer_pool_size = 10M

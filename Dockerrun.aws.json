@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "mazinoukah/evote_app",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "9000"
+    }
+  ],
+  "Logging": "/var/log/nginx"
+}

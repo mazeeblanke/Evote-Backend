@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\User;
 
 class LoginController extends Controller
 {
@@ -23,10 +24,14 @@ class LoginController extends Controller
      */
     public function create()
     {
+        // dd('sdf');
+
+        // dd(User::all());
 
         if (! $token = auth()->attempt(request(['email', 'password']))) {
             return response()->json(['error' => 'Unauthorized', 'message' => 'Wrong username or password'], 401);
         }
+
 
         return response()->json([
             'access_token' => $token,

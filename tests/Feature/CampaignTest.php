@@ -10,11 +10,42 @@ use App\CampaignPositionNormination;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use phpDocumentor\Reflection\Types\Boolean;
+use Carbon\Carbon;
 
 class CampaignTest extends TestCase
 {
 
     use RefreshDatabase;
+
+    public function testCanFetchActiveCampaigns()
+    {
+        $user = factory(User::class)->create();
+
+        factory(Campaign::class, 10)->create();
+        factory(Campaign::class)->create([ 'active' => 1 ]);
+
+        $response = $this
+            ->actingAs($user, 'api')
+            ->json('GET', 'api/campaigns?active=1');
+
+        $this->assertSame(count($response->getOriginalContent()->items()), 1);
+    }
+
+    public function testCanFetchClosedCampaigns()
+    {
+        $user = factory(User::class)->create();
+
+        // factory(Campaign::class, 10)->create();
+
+        factory(Campaign::class)->create([ 'active' => 1, 'end_date' => Carbon::now()->subDays(23)->format('Y-m-d') ]);
+        factory(Campaign::class)->create();
+
+        $response = $this
+            ->actingAs($user, 'api')
+            ->json('GET', 'api/campaigns?completed=1');
+
+        $this->assertSame(count($response->getOriginalContent()->items()), 1);
+    }
 
 
     public function testACampaignWithoutACampaignpositionCannotBeSetAsActive()

@@ -7,6 +7,7 @@ $factory->define(App\Campaign::class, function (Faker $faker) {
         'name' => $faker->firstName,
         'description' => $faker->sentence,
         'active' => false,
+        // 'active' => $faker->randomElement([true, false]),
         'start_date' => $faker->dateTimeThisCentury->format('Y-m-d'),
         'end_date' => $faker->dateTimeThisCentury->format('Y-m-d'),
     ];

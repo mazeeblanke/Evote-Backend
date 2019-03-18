@@ -1,0 +1,55 @@
+version: '2.1'
+services:
+
+  # The Application
+  app:
+    container_name: app
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    networks:
+      - mainnet
+    volumes:
+      - ./:/var/www
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=database"
+
+  # The Web Server
+  web:
+    container_name: web
+    build:
+      context: ./
+      dockerfile: web.dockerfile
+    working_dir: /var/www
+    networks:
+      - mainnet
+    volumes_from:
+      - app
+    ports:
+      - 7777:80
+
+  # The Database
+  database:
+    build:
+      context: ./
+      dockerfile: db.dockerfile
+    container_name: database
+    # volumes:
+    #   - ./mysql.cnf:/etc/mysql/my.cnf
+    networks:
+      - mainnet
+    environment:
+      - "MYSQL_DATABASE=homestead"
+      - "MYSQL_USER=homestead"
+      - "MYSQL_PASSWORD=secret"
+      - "MYSQL_ROOT_PASSWORD=secret"
+    ports:
+        - "33061:3306"
+
+volumes:
+  dbdata:
+
+networks:
+   mainnet:

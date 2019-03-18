@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\User;
 use App\CampaignPosition;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,4 +30,14 @@ class Campaign extends Model
     public function campaign_positions() {
         return $this->hasMany(CampaignPosition::class);
     }
+
+    public function enrolledUsers() {
+        return $this->belongsToMany(User::class);
+    }
+
+    public function enrolled() {
+        return $this->hasOne(CampaignUser::class, 'campaign_id');
+    }
+
+
 }

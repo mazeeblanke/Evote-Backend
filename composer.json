@@ -8,10 +8,10 @@
         "php": ">=7.0.0",
         "barryvdh/laravel-cors": "^0.11.0",
         "fzaninotto/faker": "~1.4",
-        "fideloper/proxy": "~3.3",
-        "laravel/framework": "5.5.*",
+        "fideloper/proxy": "~4.0",
+        "laravel/framework": "5.8.*",
         "laravel/tinker": "~1.0",
-        "spatie/laravel-permission": "^2.12",
+        "spatie/laravel-permission": "^2.36",
         "tymon/jwt-auth": "dev-develop"
     },
     "require-dev": {
@@ -38,6 +38,7 @@
     "extra": {
         "laravel": {
             "dont-discover": [
+                "laravel/dusk"
             ]
         }
     },

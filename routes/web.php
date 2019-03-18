@@ -1,5 +1,7 @@
 <?php
 
+use App\User;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,10 +14,11 @@
 */
 
 Route::get('/', function () {
+    // dd(User::all());
     return response()->json([
-        'we' => 2332
+        'we' => 23329999
     ]);
-    // dd(app());
+
     // return view('welcome');
 });
 

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Campaign;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\CampaignUser;
 
 class CampaignController extends Controller
 {
@@ -18,6 +20,9 @@ class CampaignController extends Controller
         $page = $request->page ?: 1;
         $limit = $request->limit ?: 10;
         $builder = Campaign::query();
+        $active = $request->active ?? 0;
+        $completed = $request->completed ?? 0;
+        $new = $request->new ?? 0;
 
         if ($search = $request->search) {
             $columns = ['name', 'description'];
@@ -26,7 +31,69 @@ class CampaignController extends Controller
             }
         }
 
-        $campaigns = $builder->orderBy('id', 'desc')->paginate($limit, ['*'], 'page', $page);
+        if (!!$completed) {
+            $builder = $builder->where('end_date', '<', Carbon::now()->format('Y-m-d'));
+        }
+
+        if (!!$new) {
+            $builder = $builder->where('end_date', '>', Carbon::now()->format('Y-m-d'));
+        }
+
+        $campaigns = $builder
+            ->where('active', $active)
+            // ->with('enrolled')
+            ->with(['enrolled' => function ($query) use ($request) {
+                $query->where('user_id', '=', $request->user()->id);
+            }])
+            ->orderBy('id', 'desc')
+            ->paginate($limit, ['*'], 'page', $page);
+
+        return response()->json($campaigns, 200);
+    }
+
+
+    public function verifyUser (Request $request, $campaignId, $userId) {
+        $result = CampaignUser::where('user_id', $userId)->where('campaign_id', $campaignId);
+        $result->update([ 'verified' => $request->verified ]);
+
+        return response()->json([ 'message' => 'succesfully updated !' ], 200);
+    }
+
+    /**
+     * Display a campaign user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function campaignUsers(Request $request, $campaignId)
+    {
+        $page = $request->page ?: 1;
+        $limit = $request->limit ?: 10;
+        $builder = CampaignUser::query();
+        $campaignId = $campaignId;
+
+
+        // if ($search = $request->search) {
+        //     $columns = ['name', 'description'];
+        //     foreach($columns as $column){
+        //         $builder = $builder->orWhere($column, 'LIKE', '%' . $search . '%');
+        //     }
+        // }
+
+        // if (!!$completed) {
+        //     $builder = $builder->where('end_date', '<', Carbon::now()->format('Y-m-d'));
+        // }
+
+        // if (!!$new) {
+        //     $builder = $builder->where('end_date', '>', Carbon::now()->format('Y-m-d'));
+        // }
+
+        $campaigns = $builder
+            ->where('campaign_id', $campaignId)
+            // ->with('enrolled')
+            ->with(['userdetails'])
+            ->orderBy('id', 'desc')
+            ->paginate($limit, ['*'], 'page', $page);
+
         return response()->json($campaigns, 200);
     }
 
@@ -110,7 +177,9 @@ class CampaignController extends Controller
 
         return response()->json([
             'message' => 'Successfully updated !',
-            'data' => $campaign->fresh()
+            'data' => $campaign->fresh()->load(['enrolled' => function ($query) use ($request) {
+                $query->where('user_id', '=', $request->user()->id);
+            }])
         ]);
     }
 
@@ -133,7 +202,7 @@ class CampaignController extends Controller
 
 
     public function disableActiveCampaign (Request $request) {
-        if (Campaign::whereActive(1)->update(['active' => 0]))
+        if (Campaign::whereId($request->id)->update(['active' => 0]))
         {
             return response()->json([
                 'message' => 'Successfully disabled active campaign'
@@ -143,6 +212,34 @@ class CampaignController extends Controller
         return response()->json([
             'message' => 'Unable to disable active campaign'
         ], 400);
+
+    }
+
+    public function enroll (Request $request) {
+        // return response()->json(['sdsd' => 'ewe']);
+        $campaign = Campaign::findOrFail($request->campaignId);
+
+        $hasEnrolled = $campaign->enrolledUsers()
+            ->where('user_id', $request->userId)
+            ->where('campaign_id', $request->campaignId)
+            ->exists();
+
+        if ($hasEnrolled) {
+            return response()->json([
+                'message' => 'User has already enrolled for this campaign'
+            ], 422);
+        }
+
+        $campaign->enrolledUsers()->attach($request->userId);
+
+        // TODO send an email here
+
+        return response()->json([
+            'message' => 'Successfully enrolled'
+        ], 200);
+
+
+
 
     }
 
@@ -172,8 +269,10 @@ class CampaignController extends Controller
         ) {
             $status = 401;
             $message = 'At least one normination has to be made for every campaign position';
-        } else if ($campaign->update(['active' => 1])) {
-            $campaign->where('id', '!=', $request->campaignId)->update(['active' => 0]);
+        } else if ($campaign->update(['active' => 1, 'start_date' => Carbon::now()->format('Y-m-d')])) {
+            // $campaign->where('id', '!=', $request->campaignId)->update(['active' => 0]);
+
+            //TODO add email to job queue, send to all users
             $status = 201;
             $message = 'Campaign successfully set as active';
             $data = $campaign->fresh();

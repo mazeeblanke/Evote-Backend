@@ -1,0 +1,2 @@
+CREATE DATABASE evote;
+CREATE DATABASE homestead;
