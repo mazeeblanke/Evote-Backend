@@ -32,11 +32,11 @@ class CampaignController extends Controller
         }
 
         if (!!$completed) {
-            $builder = $builder->where('end_date', '<', Carbon::now()->format('Y-m-d'));
+            $builder = $builder->where('end_date', '=<', Carbon::now()->format('Y-m-d'));
         }
 
         if (!!$new) {
-            $builder = $builder->where('end_date', '>', Carbon::now()->format('Y-m-d'));
+            $builder = $builder->where('end_date', '>=', Carbon::now()->format('Y-m-d'));
         }
 
         $campaigns = $builder
