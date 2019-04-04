@@ -39,6 +39,7 @@ Route::group([ 'middleware' => ['authenticate']], function() {
         'campaigns' => 'CampaignController',
         'campaign-positions' => 'CampaignPositionController',
         'campaign-position-norminations' => 'CampaignPositionNorminationController',
-        'votes' => 'VoteController'
+        'votes' => 'VoteController',
+        'dashboard' => 'DashboardController',
     ]);
 });

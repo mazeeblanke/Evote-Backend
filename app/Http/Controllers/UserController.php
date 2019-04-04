@@ -26,6 +26,7 @@ class UserController extends Controller
         $available = $request->available; // 1 for available, 0 for not available
         $builder = User::query()->with(['norminations', 'roles']);
         $columns = ['email', 'username'];
+        $confirmed = $request->confirmed;
 
         if ($search)
         {
@@ -44,7 +45,7 @@ class UserController extends Controller
             });
         }
 
-        if ($confirmed = $request->confirmed)
+        if (isset($confirmed))
         {
             $builder = $builder->whereConfirmed($confirmed);
         }
