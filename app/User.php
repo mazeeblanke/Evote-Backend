@@ -40,6 +40,10 @@ class User extends Authenticatable implements JWTSubject
         'locked_profile'
     ];
 
+    protected $casts = [
+        'locked_profile' => 'int'
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
