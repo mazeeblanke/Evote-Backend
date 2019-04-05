@@ -20,27 +20,41 @@ class CampaignController extends Controller
         $page = $request->page ?: 1;
         $limit = $request->limit ?: 10;
         $builder = Campaign::query();
-        $active = $request->active ?? 0;
-        $completed = $request->completed ?? 0;
-        $new = $request->new ?? 0;
+        $active = $request->active;
+        $completed = $request->completed;
+        $new = $request->new;
 
         if ($search = $request->search) {
             $columns = ['name', 'description'];
-            foreach($columns as $column){
-                $builder = $builder->orWhere($column, 'LIKE', '%' . $search . '%');
-            }
+
+                $builder = $builder->where( function($query) use ($columns, $search) {
+                    foreach($columns as $column){
+                        $query->orWhere($column, 'LIKE', '%' . $search . '%');
+                    }
+                    // $query->orWhere($column,  $search);
+                });
+                // $builder = $builder->orWhere($column, 'LIKE', '%' . $search . '%');
+
         }
 
-        if (!!$completed) {
+        if (isset($completed)) {
+            // dd('c');
             $builder = $builder->where('end_date', '=<', Carbon::now()->format('Y-m-d'));
         }
 
-        if (!!$new) {
+        if (isset($new)) {
+            // dd('n');
             $builder = $builder->where('end_date', '>=', Carbon::now()->format('Y-m-d'));
         }
 
+        if (isset($active)) {
+            $active = (int) $active;
+            // dd($active);
+            $builder = $builder->where('active', '=', $active);
+        }
+
         $campaigns = $builder
-            ->where('active', $active)
+
             // ->with('enrolled')
             ->with(['enrolled' => function ($query) use ($request) {
                 $query->where('user_id', '=', $request->user()->id);
@@ -70,6 +84,8 @@ class CampaignController extends Controller
         $limit = $request->limit ?: 10;
         $builder = CampaignUser::query();
         $campaignId = $campaignId;
+        $confirmed = $request->confirmed;
+        $search = $request->search;
 
 
         // if ($search = $request->search) {
@@ -87,8 +103,19 @@ class CampaignController extends Controller
         //     $builder = $builder->where('end_date', '>', Carbon::now()->format('Y-m-d'));
         // }
 
+        if (isset($confirmed)) {
+            // $confirmed = (int) $confirmed;
+            $confirmed = (int) filter_var($confirmed, FILTER_VALIDATE_BOOLEAN);
+            $builder = $builder->where('verified', $confirmed);
+        }
+
         $campaigns = $builder
             ->where('campaign_id', $campaignId)
+            ->whereHas('userdetails', function ($query) use ($search) {
+                if ($search) {
+                    $query = $query->where('username', 'LIKE', '%' . $search . '%');
+                }
+            })
             // ->with('enrolled')
             ->with(['userdetails'])
             ->orderBy('id', 'desc')

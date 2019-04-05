@@ -155,7 +155,9 @@ class UserController extends Controller
 
         if ($user = User::whereId($userId)->first()){
 
-            $payload = $request->except(['confirmed']);
+            $payload = array_merge($request->except(['confirmed']), [
+                'locked_profile' => $request->locked_profile ?? 1
+            ]);
 
             $hasAdminRole = $request->user()->can('performAdminRole', User::class);
 
